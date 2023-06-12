@@ -1,6 +1,6 @@
 package misis.repository
 
-import misis.model.{AccountUpdate, TransferFinished}
+import misis.model.TransferFinished
 
 import scala.concurrent.Future
 

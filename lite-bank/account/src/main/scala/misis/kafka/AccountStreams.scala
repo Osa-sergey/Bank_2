@@ -17,7 +17,7 @@ class AccountStreams(repository: AccountRepository)(implicit val system: ActorSy
     kafkaSource[AccountUpdate]
         .filter(command => repository.contains(command.accountId))
         .mapAsync(1) { command =>
-            Future.successful(repository.updateAccount(command.accountId, command.value))
+            Future.successful(repository.updateAccount(command.accountId, command.amount))
         }
         .to(kafkaSink)
         .run()
