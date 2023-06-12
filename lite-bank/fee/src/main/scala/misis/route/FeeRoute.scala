@@ -8,7 +8,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import scala.concurrent.ExecutionContext
 
 
-class Route(implicit ec: ExecutionContext) extends FailFastCirceSupport {
+class FeeRoute(implicit ec: ExecutionContext) extends FailFastCirceSupport {
 
     def routes =
         (path("hello") & get) {

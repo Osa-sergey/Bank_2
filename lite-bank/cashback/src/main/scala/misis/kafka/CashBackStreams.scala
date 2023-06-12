@@ -17,7 +17,7 @@ class CashBackStreams(repository: CashbackRepository, rootAccId: Int)(implicit v
     kafkaSource[TransferFinished]
         .mapAsync(1) { event =>
             val cashback = repository.calcCashback(event)
-            if(cashback > 0) produceCommand(TransferStart(rootAccId, event.from, cashback, Some("cashback")))
+            if(cashback > 0) produceCommand(TransferStart(rootAccId, event.from, cashback, 0, Some("cashback"), event.id))
             Future.successful()
         }
         .to(Sink.ignore)

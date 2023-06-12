@@ -16,7 +16,7 @@ class TransferStreams(repository: AccountRepository)(implicit val system: ActorS
     kafkaSource[TransferStart]
         .filter(command => repository.contains(command.from))
         .mapAsync(1) { command =>
-            val withdraw = repository.updateAccount(command.from, -command.amount)
+            val withdraw = repository.updateAccount(command.from, -(command.amount + command.fee))
             produceCommand(withdraw)
             Future.successful(
                 TransferStarted(command.from, command.to, command.amount, command.category, command.id, withdraw.success)
