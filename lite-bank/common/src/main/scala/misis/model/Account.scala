@@ -11,8 +11,8 @@ case class Account(id: Int, amount: Int = 0) {
 }
 
 
-case class AccountUpdate(accountId: Int, value: Int, category: Option[String]) extends Command
-case class AccountCreate(accountId: Int) extends Command
+case class AccountUpdate(accountId: Int, value: Int) extends Command
+case class AccountCreate(accountId: Int, balance: Int = 0) extends Command
 
 
 case class AccountUpdated(
@@ -20,12 +20,12 @@ case class AccountUpdated(
                              accountId: Int,
                              value: Int,
                              success: Boolean,
-                             publishedAt: Option[Instant] = Some(Instant.now()),
-                             category: Option[String]
+                             publishedAt: Option[Instant] = Some(Instant.now())
                          ) extends Event
 
 case class AccountCreated(
                              accountId: Int,
+                             balance: Int,
                              success: Boolean,
                              publishedAt: Option[Instant] = Some(Instant.now()),
                              operationId: UUID = UUID.randomUUID()

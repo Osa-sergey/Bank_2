@@ -24,9 +24,7 @@ object OperationApp extends App  {
     implicit val topicNameAccountUpdate: TopicName[AccountUpdate] = streams.simpleTopicName[AccountUpdate]
     implicit val topicNameAccountCreate: TopicName[AccountCreate] = streams.simpleTopicName[AccountCreate]
 
-    streams.produceCommand(AccountCreate(rootAccId))
-    Thread.sleep(500)
-    streams.produceCommand(AccountUpdate(rootAccId, 10000, None))
+    streams.produceCommand(AccountCreate(rootAccId, 10000))
 
     private val route = new Route(streams, repository)
     Http().newServerAt("0.0.0.0", port).bind(route.routes)

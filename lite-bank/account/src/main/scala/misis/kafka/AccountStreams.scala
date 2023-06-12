@@ -17,7 +17,7 @@ class AccountStreams(repository: AccountRepository)(implicit val system: ActorSy
     kafkaSource[AccountUpdate]
         .filter(command => repository.contains(command.accountId))
         .mapAsync(1) { command =>
-            Future.successful(repository.updateAccount(command.accountId, command.value, Some("inner_transaction")))
+            Future.successful(repository.updateAccount(command.accountId, command.value))
         }
         .to(kafkaSink)
         .run()
@@ -26,7 +26,7 @@ class AccountStreams(repository: AccountRepository)(implicit val system: ActorSy
         .filter(command =>
             command.accountId >= repository.startAccountId && command.accountId < repository.endAccountId)
         .mapAsync(1) { command =>
-            Future.successful(repository.createAccount(command.accountId))
+            Future.successful(repository.createAccount(command.accountId, command.balance))
         }
         .to(kafkaSink)
         .run()

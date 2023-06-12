@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.scaladsl.Sink
 import misis.WithKafka
 import io.circe.generic.auto._
-import misis.model.{TransferFinished, TransferStart, TransferStarted}
+import misis.model.{AccountUpdated, TransferFinished, TransferStart, TransferStarted}
 import misis.repository.AccountRepository
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,15 +16,29 @@ class TransferStreams(repository: AccountRepository)(implicit val system: ActorS
     kafkaSource[TransferStart]
         .filter(command => repository.contains(command.from))
         .mapAsync(1) { command =>
-            Future.successful(repository.transferWithdraw(command))
+            val withdraw = repository.updateAccount(command.from, -command.amount)
+            produceCommand(withdraw)
+            Future.successful(
+                TransferStarted(command.from, command.to, command.amount, command.category, command.id, withdraw.success)
+            )
         }
         .to(kafkaSink)
         .run()
 
     kafkaSource[TransferStarted]
         .filter(event => repository.contains(event.to))
-        .mapAsync(1) { command =>
-            Future.successful(repository.transferAccrue(command))
+        .mapAsync(1) { event =>
+            if (event.isSuccess) {
+                val accrue = repository.updateAccount(event.to, event.amount)
+                produceCommand(accrue)
+                Future.successful(
+                    TransferFinished(event.from, event.to, event.amount, event.category, event.id, accrue.success)
+                )
+            } else {
+                Future.successful(
+                    TransferFinished(event.from, event.to, event.amount, event.category, event.id, event.isSuccess)
+                )
+            }
         }
         .to(kafkaSink)
         .run()

@@ -22,12 +22,12 @@ class Route(streams: Streams, repository: Repository)(implicit ec: ExecutionCont
             complete("ok")
         } ~
             (path("accrue" / IntNumber / IntNumber) { (accountId, value) =>
-                val command = AccountUpdate(accountId, value, category = Some("inner_transaction"))
+                val command = AccountUpdate(accountId, value)
                 streams.produceCommand(command)
                 complete(command)
             }) ~
             (path("withdraw" / IntNumber / IntNumber) { (accountId, value) =>
-                val command = AccountUpdate(accountId, -value, category = Some("inner_transaction"))
+                val command = AccountUpdate(accountId, -value)
                 streams.produceCommand(command)
                 complete(command)
             }) ~
@@ -37,7 +37,7 @@ class Route(streams: Streams, repository: Repository)(implicit ec: ExecutionCont
                 complete(command)
             }) ~
             (path("transfer") & post & entity(as[TransferRequest])) { transfer =>
-                repository.transfer(TransferStart(transfer.from, transfer.to, transfer.amount))
+                repository.transfer(TransferStart(transfer.from, transfer.to, transfer.amount, transfer.category))
                 complete(transfer)
             }
 }

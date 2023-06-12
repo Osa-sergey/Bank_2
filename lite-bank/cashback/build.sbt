@@ -12,10 +12,10 @@ lazy val postgresVersion = "42.3.1"
 
 lazy val common = ProjectRef(base = file("../common"), id = "common")
 
-lazy val template = (project in file("."))
+lazy val cashback = (project in file("."))
     .dependsOn(common)
     .settings(
-        name := "template",
+        name := "cashback",
         libraryDependencies ++= Seq(
             "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
             "de.heikoseeberger" %% "akka-http-circe" % AkkaHttpJsonVersion,
