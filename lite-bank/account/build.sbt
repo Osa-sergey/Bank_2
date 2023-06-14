@@ -10,7 +10,7 @@ val AkkaHttpJsonVersion = "1.39.2"
 lazy val slickVersion = "3.3.3"
 lazy val postgresVersion = "42.3.1"
 
-lazy val common = ProjectRef(base = file("../common"), id = "common")
+lazy val common = ProjectRef(base = file("/build/common"), id = "common")
 
 lazy val account = (project in file("."))
     .dependsOn(common)

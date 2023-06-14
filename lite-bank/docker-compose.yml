@@ -1,0 +1,92 @@
+version: '3.1'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - misis-local
+
+  kafka:
+    image: wurstmeister/kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - 9094:9094
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OPTS: -Xms128m -Xmx256m
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://127.0.0.1:9094
+      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+      KAFKA_ADVERTISED_HOSTNAME: INSIDE
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+    networks:
+      - misis-local
+
+  account_0:
+    depends_on:
+      - kafka
+    build:
+      dockerfile: ./images/account.Dockerfile
+    environment:
+      APP_PORT: 8070
+      START_ACCOUNT_ID: 0
+      END_ACCOUNT_ID: 100
+    networks:
+      - misis-local
+
+  account_1:
+    depends_on:
+      - kafka
+    build:
+      dockerfile: ./images/account.Dockerfile
+    environment:
+      APP_PORT: 8071
+      START_ACCOUNT_ID: 100
+      END_ACCOUNT_ID: 200
+    networks:
+      - misis-local
+
+  operation:
+    depends_on:
+      - kafka
+      - account_0
+      - account_1
+    ports:
+      - "8090:8090"
+    build:
+      dockerfile: ./images/operation.Dockerfile
+    environment:
+      APP_PORT: 8090
+    networks:
+      - misis-local
+
+  cashback:
+    depends_on:
+      - kafka
+    build:
+      dockerfile: ./images/cashback.Dockerfile
+    environment:
+      APP_PORT: 8091
+      CASHBACK_PERCENT: 10
+      CASHBACK_CAT: "art"
+    networks:
+      - misis-local
+
+  fee:
+    depends_on:
+      - kafka
+    build:
+      dockerfile: ./images/fee.Dockerfile
+    environment:
+      APP_PORT: 8092
+      FEE_PERCENT: 20
+      FEE_LIMIT: 300
+    networks:
+      - misis-local
+
+networks:
+  misis-local:
